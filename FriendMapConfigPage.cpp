@@ -23,6 +23,7 @@
 #include "FriendMapConfigPage.h"
 #include "ui_FriendMapConfigPage.h"
 #include <QCheckBox>
+#include <QFileInfo>
 
 //!
 //! \brief FriendMapConfigPage::FriendMapConfigPage
@@ -89,7 +90,12 @@ bool FriendMapConfigPage::save(QString &errmsg)
 
     settings->projection = (Marble::Projection)ui->projection_box->currentIndex();
     settings->map_theme_id = ui->theme_dgml->currentText().toStdString();
-    settings->geoip_data_path = ui->geoip_path_line->text().toStdString();
+    QString geoip_path = QDir::fromNativeSeparators(ui->geoip_path_line->text().trimmed());
+    if(!geoip_path.isEmpty() && !QFileInfo(geoip_path).isFile()){
+        errmsg = "GeoIP data file not found: " + geoip_path;
+        return false;
+    }
+    settings->geoip_data_path = QDir::toNativeSeparators(geoip_path).toStdString();
     
 #ifdef WIN32
     // why is this just for windows? On Linux returns warning for unused variable

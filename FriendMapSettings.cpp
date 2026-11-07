@@ -60,7 +60,7 @@ void FriendMapSettings::processSettings(bool load)
         // load settings
 
 	show_grid = Settings->value("show_grid").toBool();
-	show_links = Settings->value("show_links").toBool();
+	show_links = Settings->value("show_links", true).toBool();  // on by default
 	show_borders = Settings->value("show_borders").toBool();
 	show_cities = Settings->value("show_cities").toBool();
 	show_ice_layer = Settings->value("show_ice_layer").toBool();
@@ -73,6 +73,10 @@ void FriendMapSettings::processSettings(bool load)
 	map_theme_id = Settings->value("map_theme_id").toString().toStdString();
 
         if (map_theme_id.length() < 2)map_theme_id = "earth/bluemarble/bluemarble.dgml";
+
+        // paths set by the user (empty = auto-detect in setStdPaths)
+        geoip_data_path = Settings->value("geoip_data_path").toString().toStdString();
+        marble_path = Settings->value("marble_path").toString();
     } else {
 	// save settings
 	Settings->setValue("show_grid", show_grid);
@@ -87,6 +91,8 @@ void FriendMapSettings::processSettings(bool load)
     Settings->setValue("detached", detached);
 	Settings->setValue("projection_type", projection);
 	Settings->setValue("map_theme_id", QString::fromStdString(map_theme_id));
+	Settings->setValue("geoip_data_path", QString::fromStdString(geoip_data_path));
+	Settings->setValue("marble_path", marble_path);
     }
 
     Settings->endGroup();
@@ -122,7 +128,9 @@ void FriendMapSettings::setStdPaths(RsPluginHandler *pgHandler)
     //Finding marble installation
     //Included with the plugin, RS_folder/marble
     QDir marblepathlocal = QDir(QCoreApplication::applicationDirPath());
-    if(marblepathlocal.cd("marble") && setMarblePath(marblepathlocal)){
+    if(!marble_path.isEmpty() && setMarblePath(QDir(QDir::fromNativeSeparators(marble_path)))){
+        //saved path from the settings is valid, nothing to do
+    }else if(marblepathlocal.cd("marble") && setMarblePath(marblepathlocal)){
         //found in RS folder, nothing to do
     }else{
         //look for it in Program Files
@@ -150,6 +158,11 @@ void FriendMapSettings::setStdPaths(RsPluginHandler *pgHandler)
         }
     }
 #endif
+
+    //keep the saved GeoIP file if it still exists, otherwise search the plugin folders
+    if(validPaths())
+        return;
+    geoip_data_path.clear();
 
     const std::vector<std::string>& plugin_directories = pgHandler->getPluginDirectories();
     foreach(const std::string& dir, plugin_directories){

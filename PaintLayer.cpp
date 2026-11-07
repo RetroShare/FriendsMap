@@ -119,6 +119,8 @@ public:
 QList<GeoPeer> geoPeers;
 QMap<RsPgpId, GeoPeer> peerTable;
 void PaintLayer::genPeerCache(){
+    if(geoip == NULL)
+        return; // no GeoIP data loaded, nothing to place on the map
 
     srand(42);
 
