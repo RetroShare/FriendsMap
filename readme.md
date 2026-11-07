@@ -2,7 +2,21 @@
 ## Geographic Friend Map
 This extension for RetroShare shows your friends on a map or globe.
 
-This product uses GeoLite data created by MaxMind, available from <a href="https://www.maxmind.com">https://www.maxmind.com</a>.
+This product uses GeoLite data created by MaxMind.
+
+## Features
+- Shows your friends on an interactive globe or flat map (based on [Marble](https://marble.kde.org))
+- Locates friends by their public IPv4 address using a GeoIP City database
+- Every location (node) of a friend is shown with its name
+- Online friends are drawn in green, offline friends in red
+- Optional friend avatars on the map
+- Optional links between friends who know each other (from RetroShare discovery)
+- Three projections: Spherical (globe), Equirectangular and Mercator
+- Several map themes: Blue Marble, OpenStreetMap, City Lights, Schagen 1689 and Plain, or any other Marble theme
+- Optional map layers: grid, borders, cities, ice, clouds, city lights and sun shading (day/night)
+- Settings apply immediately and are saved
+- Optional standalone window: the map only opens on request and uses no resources while closed
+- Finds Marble and the GeoIP data automatically; paths can also be set by hand
 
 > **Qt version:** the plugin, RetroShare and Marble must all use the **same Qt major version**.
 > A Qt 5 RetroShare cannot load a Qt 6 Marble, and the other way round.
