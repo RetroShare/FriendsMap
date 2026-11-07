@@ -58,33 +58,12 @@ gunzip GeoLiteCity.dat.gz
 
 ### Windows
 
-#### Before You Start
-
-It is assumed that you have similar folder structure described in the Retroshare Windows compile instructions, and also that you have Retroshare build enviroment setted up.  
-
-Refer to this page for further instructions: https://wiki.cavebeat.org/index.php/Compile_windows.
-
-It is assumed your RetroShare development folder is under c:\Development and RetroShare's sourcecode is under c:\Development\src  
-
-It is assumed RetroShare is installed under c:\Program Files (x86)\RetroShare
-
-You will need a bash terminal with cmake, gcc and Qt in your path:
-
-* Refer section "Setup build enviroment"  
-* Start devenv.bat (described in section "Make a script to launch your development environment") or MinGW-Shell.bat (if you have the buildscripts). It is possible that some commands need administrator privileges, so start the script by right click on the bat file and select Run as administrator.
-* Run the test described in section "Test if everything is working", if one of this test fails, you may have compile problems. 
-
-You will need a Git client:
-
-* MSysGit for command line interface: http://msysgit.github.io/
-* TortoiseGit for graphical interface: https://code.google.com/p/tortoisegit/
-* Or any other Git client
-
 #### LibGeoIP
 GeoIP is a C library that enables the user to find geographical and network information of an IP address. To use this library, you may download our free GeoLite Country or City databases. These are updated at the beginning of every month.
 
 ##### Get the source
-Checkout the source code under c:\Development\geoip-api-c from https://github.com/maxmind/geoip-api-c.git   
+Checkout the source code under c:\Development\geoip-api-c from https://github.com/maxmind/geoip-api-c.git
+
 Using command line:
 <pre>
 cd c:\Development
@@ -97,20 +76,27 @@ Building libGeoIp is problematic, but we don't need the lib, the source files ar
 To read more about some of the features of marble, visit http://marble.kde.org/features.php .
 
 ##### Get the source
-Checkout the source code under c:\Development\marble from git://anongit.kde.org/marble , branch KDE/4.11 .
+Checkout the source code under c:\Development\marble.
+
 Using command line:
 <pre>
 cd c:\Development
-git clone -b Applications/17.04 https://invent.kde.org/education/marble.git marble
+git clone https://invent.kde.org/education/marble.git marble
 cd marble
 </pre>
 
 ##### Build and install
 Marble will be installed under c:\Program Files (x86)\marble\ or c:\Program Files\marble\ by default, you can change the install path by changing the parameters of the cmake.  
 
-For more information visit http://techbase.kde.org/Projects/Marble/WindowsCompiling
+For more information visit https://community.kde.org/Marble/WindowsCompiling
 
-Start devenv.bat or MinGW-Shell.bat with administrator privileges, and run these commands:
+#### Compiling Marble using MinGW
+
+Require for MINGW64:
+<pre>
+pacman -S mingw-w64-x86_64-extra-cmake-modules
+</pre>
+
 <pre>
 cd c:/Development/marble
 mkdir build
@@ -127,20 +113,28 @@ Put some files from Marble to the right place in order to make FriendMap compile
 
 #### FriendMap plugin
 ##### Get the source
-Checkout the source code under c:\Development\src\plugins from git@github.com:chozabu/FriendMap.git
+Checkout the source code under c:\Development\src\plugins
+
 Using command line:
 <pre>
 cd c:\Development\src\plugins  
-git clone git@github.com:chozabu/FriendMap.git  
+git clone https://github.com/RetroShare/FriendsMap.git  
 </pre>
 
 ##### Build
 Open the file c:\Development\git\plugins\plugins.pro in text editor and add this line:
 <pre>
-FriendMap \
+FriendsMap \
 </pre>
 
-To build the plugin use the build script, or you can use the Qt Creator.   
+Using command line:
+<pre>
+cd FriendsMap  
+qmake
+mingw32-make
+</pre>
+
+Alternative build the plugin use the build script, or you can use the Qt Creator.   
 If you are using Qt Creator, open the retroshare.pro, not the FriendMap.pro. With Qt Creator you can rebuild only this plugin, if you have built the other RetroShare components before.
 
 ##### Install the plugin
