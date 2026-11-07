@@ -2,17 +2,6 @@
 ## Geographic Friend Map
 This extension for RetroShare shows your friends on a map or globe.
 
-Original author: Nyfor.
-
-Chozabus updates include:
- - Update to work with latest RS
- - Fix crashes
- - Show friend links
- - Choice of several maps
- - Cache data
- - Optional friend links, clouds, cities, borders, avatars, etc.
- - Persistent settings
-
 This product uses GeoLite data created by MaxMind, available from <a href="https://www.maxmind.com">https://www.maxmind.com</a>.
 
 > **Qt version:** the plugin, RetroShare and Marble must all use the **same Qt major version**.
@@ -98,7 +87,7 @@ GitHub/
 ```bash
 pacman -S --needed mingw-w64-x86_64-cmake mingw-w64-x86_64-extra-cmake-modules \
                    mingw-w64-x86_64-qt5-base mingw-w64-x86_64-qt5-svg \
-                   mingw-w64-x86_64-qt5-tools
+                   mingw-w64-x86_64-qt5-tools mingw-w64-x86_64-qt5-declarative
 ```
 
 ### libGeoIP
@@ -112,9 +101,9 @@ git clone https://github.com/maxmind/geoip-api-c.git
 ### Marble (Qt 5)
 ```bash
 cd /c/Users/<you>/Documents/GitHub
-git clone https://invent.kde.org/education/marble.git marble
+git -c core.autocrlf=false clone --branch release/23.08 --depth 1 \
+    https://invent.kde.org/education/marble.git marble
 cd marble
-git checkout release/23.08
 
 mkdir build && cd build
 cmake .. -G "MSYS Makefiles" \
@@ -128,6 +117,11 @@ make install
 
 Notes:
 - Check the CMake output says it found **Qt5**. If it picks Qt 6, delete `build/` and try again.
+- If you already have a Marble checkout on master, switching with `git checkout release/23.08`
+  can fail with *"Your local changes ... would be overwritten"* (usually only line endings).
+  Simplest fix: delete the `marble` folder and clone again with the command above.
+- If a configure step failed, remove `build/CMakeCache.txt` and `build/CMakeFiles` before running
+  `cmake` again.
 - **Always set `CMAKE_INSTALL_PREFIX`.** Without it Marble tries to install into
   `C:\Program Files (x86)\marble` and fails with *"Maybe need administrative privileges"*.
 - `make install` is required: it collects the headers into `install/include/marble/` and copies the
@@ -147,7 +141,7 @@ Dependencies:
 ```bash
 pacman -S --needed mingw-w64-x86_64-cmake mingw-w64-x86_64-extra-cmake-modules \
                    mingw-w64-x86_64-qt6-base mingw-w64-x86_64-qt6-svg \
-                   mingw-w64-x86_64-qt6-tools
+                   mingw-w64-x86_64-qt6-tools mingw-w64-x86_64-qt6-declarative
 ```
 Build Marble from master (no branch checkout, no `QT_MAJOR_VERSION`):
 ```bash
@@ -204,3 +198,13 @@ with RetroShare:
 - Copy `marble\install\data` to `RetroShare\marble\data`.
 - Copy `marble\install\plugins` to `RetroShare\marble\plugins`.
 - `marble.exe` and the other Marble apps are not needed.
+
+---
+
+## Credits
+- **Nyfor** — original author
+- **Chozabu** — updates and maintenance
+
+Contributors:
+- Morpheus Being
+- hunbernd
