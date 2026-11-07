@@ -13,12 +13,15 @@ HEADERS -= upnp/upnputil.h
 SOURCES -= upnp/upnputil.c
 
 win32{
-#Fixing libGeoIp compile errors
-DEFINES += WINVER=0x0501 _WIN32_WINNT=0x0501 PACKAGE_VERSION=\\\"1.6\\\"
+    # Fixing libGeoIP compile errors
+    DEFINES += WINVER=0x0501 _WIN32_WINNT=0x0501 PACKAGE_VERSION=\\\"1.6\\\"
 
-INCLUDEPATH += ../../../geoip-api-c/libGeoIP ../../../marble/include
-SOURCES +=   ../../../geoip-api-c/libGeoIP/GeoIp.c ../../../geoip-api-c/libGeoIP/GeoIpCity.c ../../../geoip-api-c/libGeoIP/GeoIP_deprecated.c
-LIBS += -lQtSVG4 -lQtWebKit4 -lws2_32
+    MARBLE_DIR   = ../../../marble/install
+    INCLUDEPATH += ../../../geoip-api-c/libGeoIP $$MARBLE_DIR/include
+    SOURCES += ../../../geoip-api-c/libGeoIP/GeoIP.c \
+               ../../../geoip-api-c/libGeoIP/GeoIPCity.c \
+               ../../../geoip-api-c/libGeoIP/GeoIP_deprecated.c
+    LIBS += -L$$MARBLE_DIR/lib -lws2_32
 }
 
 RESOURCES += \
@@ -43,10 +46,13 @@ SOURCES += \
     FriendMapDetached.cpp \
     FriendMapController.cpp
 
+# Marble library name follows the Qt major version (marblewidget-qt5 / marblewidget-qt6)
+MARBLE_LIB = marblewidget-qt$$QT_MAJOR_VERSION
+
 win32{
-    LIBS += -lmarblewidget
+    LIBS += -L$$MARBLE_DIR/lib -l$$MARBLE_LIB
 } else {
-    LIBS += -lmarblewidget-qt5 -lGeoIP
+    LIBS += -l$$MARBLE_LIB -lGeoIP
 }
 
 FORMS += \
