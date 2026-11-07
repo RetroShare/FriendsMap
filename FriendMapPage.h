@@ -49,6 +49,11 @@ private:
     RsDisc* mDisc;
     RsPeers* peers;
     PaintLayer* layer;
+
+    // what the current layer was built with (rebuild only when these change)
+    std::string mLayerGeoIpPath;
+    bool mLayerShowLinks = false;
+    bool mLayerShowAvatars = false;
 };
 
 #endif // FRIENDMAPPAGE_H

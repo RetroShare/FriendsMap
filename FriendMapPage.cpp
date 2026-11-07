@@ -59,18 +59,34 @@ FriendMapPage::~FriendMapPage()
 //! \brief FriendMapPage::setConfig
 //! \param settings
 //!
-void FriendMapPage::setConfig(const FriendMapSettings* settings){    
-    ui->MarbleWidget->setMapThemeId(settings->getMapThemeId().c_str());
-    ui->MarbleWidget->setProjection(settings->getProjection());
-    ui->MarbleWidget->setShowGrid(settings->getShowGrid());
+void FriendMapPage::setConfig(const FriendMapSettings* settings){
+    // Settings are applied on every checkbox click, so only touch what changed:
+    // reloading the map theme or recalculating sun shading is expensive.
+    Marble::MarbleWidget* w = ui->MarbleWidget;
+    const QString theme = QString::fromStdString(settings->getMapThemeId());
+    if(w->mapThemeId() != theme)                               w->setMapThemeId(theme);
+    if(w->projection() != settings->getProjection())           w->setProjection(settings->getProjection());
+    if(w->showGrid() != settings->getShowGrid())               w->setShowGrid(settings->getShowGrid());
+    if(w->showBorders() != settings->getShowBorders())         w->setShowBorders(settings->getShowBorders());
+    if(w->showCities() != settings->getShowCities())           w->setShowCities(settings->getShowCities());
+    if(w->showIceLayer() != settings->getShowIceLayer())       w->setShowIceLayer(settings->getShowIceLayer());
+    if(w->showClouds() != settings->getShowClouds())           w->setShowClouds(settings->getShowClouds());
+    if(w->showCityLights() != settings->getShowCityLights())   w->setShowCityLights(settings->getShowCityLights());
+    if(w->showSunShading() != settings->getShowSunShading())   w->setShowSunShading(settings->getShowSunShading());
 
-    ui->MarbleWidget->setShowBorders(settings->getShowBorders());
-    ui->MarbleWidget->setShowCities(settings->getShowCities());
-    ui->MarbleWidget->setShowIceLayer(settings->getShowIceLayer());
-    ui->MarbleWidget->setShowClouds(settings->getShowClouds());
-    ui->MarbleWidget->setShowCityLights(settings->getShowCityLights());
-    ui->MarbleWidget->setShowSunShading(settings->getShowSunShading());
     if(settings->validPaths()){
+        // the friend layer only depends on the GeoIP file, links and avatars
+        if(layer != NULL
+           && mLayerGeoIpPath == settings->getGeoIpDataPath()
+           && mLayerShowLinks == settings->getShowLinks()
+           && mLayerShowAvatars == settings->getShowAvatars()){
+            w->update();
+            return;
+        }
+        mLayerGeoIpPath = settings->getGeoIpDataPath();
+        mLayerShowLinks = settings->getShowLinks();
+        mLayerShowAvatars = settings->getShowAvatars();
+
         if(layer != NULL){
             ui->MarbleWidget->removeLayer(layer);
             delete layer;

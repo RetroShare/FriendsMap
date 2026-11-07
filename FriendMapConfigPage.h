@@ -62,6 +62,8 @@ signals:
 
 private slots:
     void detached_toggled(bool state);
+    /** RetroShare preferences have no OK/Apply button: save and apply on every change */
+    void applySettings();
     
 private:
     Ui::FriendMapConfigPage *ui;

@@ -23,6 +23,9 @@
 #include "FriendMapConfigPage.h"
 #include "ui_FriendMapConfigPage.h"
 #include <QCheckBox>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QMessageBox>
 #include <QFileInfo>
 
 //!
@@ -36,6 +39,39 @@ FriendMapConfigPage::FriendMapConfigPage(FriendMapSettings* settings) :
     connect(ui->detached_window, SIGNAL(toggled(bool)), this, SLOT(detached_toggled(bool)));
     this->settings = settings;
     load();
+
+    // Preferences have no OK button any more, so apply every change right away.
+    // Connected after load() so filling the widgets does not trigger a save.
+    const QList<QCheckBox*> boxes = {
+        ui->show_grid, ui->show_links, ui->show_borders, ui->show_cities,
+        ui->show_ice_layer, ui->show_clouds, ui->show_city_lights,
+        ui->show_sun_shading, ui->show_avatars, ui->detached_window };
+    for (QCheckBox* box : boxes)
+        connect(box, &QCheckBox::toggled, this, &FriendMapConfigPage::applySettings);
+
+    connect(ui->projection_box, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &FriendMapConfigPage::applySettings);
+    connect(ui->theme_dgml, QOverload<int>::of(&QComboBox::activated),
+            this, &FriendMapConfigPage::applySettings);
+    if (ui->theme_dgml->lineEdit())   // editable: apply a typed theme when editing ends
+        connect(ui->theme_dgml->lineEdit(), &QLineEdit::editingFinished,
+                this, &FriendMapConfigPage::applySettings);
+
+    connect(ui->geoip_path_line, &QLineEdit::editingFinished,
+            this, &FriendMapConfigPage::applySettings);
+    connect(ui->marble_path_line, &QLineEdit::editingFinished,
+            this, &FriendMapConfigPage::applySettings);
+}
+
+//!
+//! \brief FriendMapConfigPage::applySettings
+//! Saves the page and updates the map; shows the error if a path is invalid.
+//!
+void FriendMapConfigPage::applySettings()
+{
+    QString errmsg;
+    if (!save(errmsg))
+        QMessageBox::warning(this, tr("FriendMap"), errmsg);
 }
 
 //!
@@ -100,7 +136,9 @@ bool FriendMapConfigPage::save(QString &errmsg)
 #ifdef WIN32
     // why is this just for windows? On Linux returns warning for unused variable
     QString dir = QDir::fromNativeSeparators(ui->marble_path_line->text());
-    if(!settings->setMarblePath(QDir(dir))){
+    // only re-register Marble's data/plugin folders when the path really changed
+    if(QDir(dir).canonicalPath() != QDir(QDir::fromNativeSeparators(settings->marble_path)).canonicalPath()
+       && !settings->setMarblePath(QDir(dir))){
         errmsg = "invalid marble path";
         return false;
     }

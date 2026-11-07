@@ -32,6 +32,24 @@
 
 #define PI 3.14159265
 
+//! true for a dotted IPv4 address like "93.184.216.34" (no host names)
+static bool isNumericIPv4(const std::string& addr)
+{
+    int parts = 0, value = -1;
+    for (char c : addr) {
+        if (c >= '0' && c <= '9') {
+            value = (value < 0 ? 0 : value) * 10 + (c - '0');
+            if (value > 255) return false;
+        } else if (c == '.') {
+            if (value < 0) return false;
+            ++parts; value = -1;
+        } else {
+            return false;
+        }
+    }
+    return parts == 3 && value >= 0;
+}
+
 //!
 //! \brief PaintLayer::PaintLayer
 //  Obtains settings and the map data file.
@@ -144,9 +162,11 @@ void PaintLayer::genPeerCache(){
         foreach(const RsPeerId& ssl_id, ssl_ids){
             RsPeerDetails peer_ssl_details;
             rsPeers->getPeerDetails(ssl_id, peer_ssl_details);
-            if(peer_ssl_details.extAddr.compare("0.0.0.0")){
-                //std::cout<<peer_ssl_details.extAddr<<"\n";
-                GeoIPRecord *r = GeoIP_record_by_name(geoip, peer_ssl_details.extAddr.c_str());
+            // Only numeric IPv4 addresses: GeoIP_record_by_name() would do a blocking
+            // DNS lookup for anything else (host names, Tor/I2P, IPv6, empty), which
+            // froze the GUI. GeoIP_record_by_addr() never touches DNS.
+            if(peer_ssl_details.extAddr != "0.0.0.0" && isNumericIPv4(peer_ssl_details.extAddr)){
+                GeoIPRecord *r = GeoIP_record_by_addr(geoip, peer_ssl_details.extAddr.c_str());
                 if(r){
                     GeoPeerLoc sLocation;
                     sLocation.coord = GeoDataCoordinates(r->longitude, r->latitude, 0.0, GeoDataCoordinates::Degree);
