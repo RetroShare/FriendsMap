@@ -110,6 +110,7 @@ cmake .. -G "MSYS Makefiles" \
   -DCMAKE_BUILD_TYPE=Release \
   -DQT_MAJOR_VERSION=5 \
   -DCMAKE_INSTALL_PREFIX=/c/Users/<you>/Documents/GitHub/marble/install \
+  -DCMAKE_DISABLE_FIND_PACKAGE_Protobuf=TRUE \
   -DBUILD_MARBLE_APPS=OFF -DBUILD_MARBLE_TESTS=OFF -DBUILD_MARBLE_EXAMPLES=OFF
 make -j8
 make install
@@ -122,6 +123,11 @@ Notes:
   Simplest fix: delete the `marble` folder and clone again with the command above.
 - If a configure step failed, remove `build/CMakeCache.txt` and `build/CMakeFiles` before running
   `cmake` again.
+- `-DCMAKE_DISABLE_FIND_PACKAGE_Protobuf=TRUE` builds Marble's OSM plugin without `.osm.pbf`
+  support (FriendsMap does not need it). Marble 23.08 does not link with the current MSYS2 protobuf;
+  without this option the build stops with
+  *"undefined reference to `__emutls_v._ZN6google8protobuf8internal15ThreadSafeArena13thread_cache_E'"*
+  in `OsmPlugin.dll`.
 - **Always set `CMAKE_INSTALL_PREFIX`.** Without it Marble tries to install into
   `C:\Program Files (x86)\marble` and fails with *"Maybe need administrative privileges"*.
 - `make install` is required: it collects the headers into `install/include/marble/` and copies the
@@ -176,16 +182,27 @@ In Qt Creator open `RetroShare.pro` (not `FriendMap.pro`); you can then rebuild 
 the other RetroShare components are built.
 
 ### Install the plugin
-- Copy `FriendMap.dll` from `plugins/FriendsMap/lib/` to `RetroShare\Data\extensions` (portable)
-  or `%APPDATA%\RetroShare\extensions`.
-- Copy `libmarblewidget-qt5.dll` (or `-qt6`) from `marble\install` (or `marble\install\bin`) next to `retroshare.exe`.
-- Copy the DLLs Marble depends on next to `retroshare.exe`. To list them:
-  ```bash
-  ldd /c/Users/<you>/Documents/GitHub/marble/install/libmarblewidget-qt*.dll | grep mingw64
-  ```
-- Put the GeoLite City database (`GeoLiteCity.dat`, legacy GeoIP format) in the extensions folder.
-  Note: MaxMind no longer distributes the legacy `.dat` files from the old
-  `geolite.maxmind.com` URL.
+Run the deploy script from the FriendsMap folder (in a normal `cmd` window):
+```bat
+deploy-friendsmap.bat "C:\path\to\RetroShare"
+```
+(the folder that contains `retroshare.exe`). It copies:
+- the plugin DLL to `Data\extensions6` (portable) or `%APPDATA%\RetroShare\extensions6`,
+- the Marble DLLs next to `retroshare.exe`,
+- Marble `data` and `plugins` to `RetroShare\marble\`,
+- missing MinGW/Qt runtime DLLs from MSYS2 (found with `ldd`),
+- `GeoLiteCity.dat` to the extensions folder (downloaded once, see below).
+
+Edit `MSYS2_DIR` / `MARBLE_DIR` at the top of the script if your paths differ.
+
+#### GeoIP data (GeoLiteCity.dat)
+MaxMind no longer publishes the legacy `GeoLiteCity.dat`. The plugin still uses the legacy
+GeoIP format, so use a GeoLite2 database converted to legacy format, e.g. from
+<https://www.miyuru.lk/geoiplegacy> — **City, MaxMind, IPv4** (`maxmind4.dat.gz`).
+Unpack it and rename it to `GeoLiteCity.dat`. The deploy script does this automatically and keeps a
+copy next to the script; delete that copy to get a newer one.
+
+Attribution: *Geolocation database of MaxMind converted by Miyuru Sankalpa.*
 
 Start RetroShare. The first start can be slow.
 If needed, set the correct paths under **Options → FriendMap**.
