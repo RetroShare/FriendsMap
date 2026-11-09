@@ -33,10 +33,12 @@ FriendMapController::FriendMapController(QObject *parent) :
 
 FriendMapController::~FriendMapController()
 {
-    delete settings;
-    delete mainPage;
-    if(friendMapPage)
-        delete friendMapPage;
+    // Do NOT delete mainPage / friendMapPage (or settings, which they use) here.
+    // The plugin is deleted by RsPluginManager::stopPlugins() in a libretroshare
+    // thread during shutdown, while the pages are QWidgets owned by the RetroShare
+    // main window. Deleting them here (wrong thread, or already deleted by Qt)
+    // caused a SIGSEGV that killed the "rs main" thread and made shutdown hang.
+    // The GUI cleans up its own widgets; other plugins do the same.
 }
 
 MainPage *FriendMapController::qt_page() const
