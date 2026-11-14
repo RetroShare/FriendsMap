@@ -18,6 +18,10 @@ This product uses GeoLite data created by MaxMind.
 - Optional standalone window: the map only opens on request and uses no resources while closed
 - Finds Marble and the GeoIP data automatically; paths can also be set by hand
 
+<img width="1270" height="758" alt="image" src="https://github.com/user-attachments/assets/54e3904a-becd-4a40-affc-26f69725ee05" />
+
+
+
 > **Qt version:** the plugin, RetroShare and Marble must all use the **same Qt major version**.
 > A Qt 5 RetroShare cannot load a Qt 6 Marble, and the other way round.
 >
